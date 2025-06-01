@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.map_box_project"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

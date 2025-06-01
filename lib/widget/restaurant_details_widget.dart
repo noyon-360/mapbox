@@ -8,12 +8,12 @@ class RestaurantDetailModal extends StatelessWidget {
   final VoidCallback onMessage;
 
   const RestaurantDetailModal({
-    Key? key,
+    super.key,
     required this.restaurant,
     required this.isFavorite,
     required this.onFavoriteToggle,
     required this.onMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +68,8 @@ class RestaurantDetailModal extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      restaurant.image,
+                    child: Image.network(
+                      restaurant.imageUrl ?? '',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(

@@ -38,6 +38,7 @@ dependencies:
   # mapbox_gl: ^0.16.0
   mapbox_maps_flutter:
   geolocator: ^14.0.1
+  dio: ^5.8.0+1
 
 dev_dependencies:
   flutter_test:

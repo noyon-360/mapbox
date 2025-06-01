@@ -8,6 +8,8 @@ class Restaurant {
   final double latitude;
   final double longitude;
   final String image;
+  final String? imageUrl;
+  final String category;
   final String description;
   final String price;
   final String hours;
@@ -22,6 +24,8 @@ class Restaurant {
     required this.latitude,
     required this.longitude,
     required this.image,
+    this.imageUrl,
+    required this.category,
     required this.description,
     required this.price,
     required this.hours,
