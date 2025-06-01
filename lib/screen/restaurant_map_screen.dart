@@ -8,6 +8,18 @@ import '../model/restaurant.dart';
 import '../widget/restaurant_details_widget.dart';
 import '../widget/search_bar_widget.dart';
 
+// Add this class to implement the OnPointAnnotationClickListener
+class MyPointAnnotationClickListener implements OnPointAnnotationClickListener {
+  final Function(PointAnnotation) onTap;
+
+  MyPointAnnotationClickListener(this.onTap);
+
+  @override
+  void onPointAnnotationClick(PointAnnotation annotation) {
+    onTap(annotation);
+  }
+}
+
 class RestaurantMapScreen extends StatefulWidget {
   const RestaurantMapScreen({super.key});
 
@@ -38,7 +50,7 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
 
   OnPointAnnotationClickListener? _annotationClickListener;
 
-  final Dio _dio = Dio();
+  // final Dio _dio = Dio();
   final String mapboxAccessToken = dotenv.env['MAPBOX_ACCESS_TOKEN'] ?? '';
 
   // Restaurant categories with colors and icons
@@ -119,6 +131,7 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
 
       if (permission == geo.LocationPermission.whileInUse ||
           permission == geo.LocationPermission.always) {
+        // Get the current position with high accuracy and handle possible exceptions
         geo.Position position = await geo.Geolocator.getCurrentPosition(
           desiredAccuracy: geo.LocationAccuracy.high,
         );
@@ -173,7 +186,6 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
 
       if (_annotationClickListener != null) {
         pointAnnotationManager!.addOnPointAnnotationClickListener(
-          
           _annotationClickListener!,
         );
       }
@@ -231,6 +243,7 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
       final annotation = await pointAnnotationManager!.create(
         pointAnnotationOptions,
       );
+      print("Restaurent anotation -> ${annotation.iconColor}");
       restaurantAnnotations.add(annotation);
     }
 
@@ -333,7 +346,7 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
             onFavoriteToggle: () => _toggleFavorite(restaurant.id),
             onMessage: () => _handleMessage(restaurant),
 
-            // onDirections: () => _getDirections(restaurant),
+            onDirections: () => _getDirections(restaurant),
             // onCall: () => _callRestaurant(restaurant),
           ),
     );
@@ -355,8 +368,45 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
     _showSuccessSnackBar('Opening chat with ${restaurant.name}');
   }
 
-  void _getDirections(Restaurant restaurant) {
-    _showSuccessSnackBar('Getting directions to ${restaurant.name}');
+  Future<void> _getDirections(Restaurant restaurant) async {
+    if (userLocation == null) {
+      _showErrorSnackBar("Cannot get directions - location unavailable");
+      return;
+    }
+
+    final origin = "${userLocation!.longitude},${userLocation!.latitude}";
+    final destination = "${restaurant.longitude},${restaurant.latitude}";
+
+    // Mapbox Directions URL
+    final mapboxDirectionsUrl =
+        "https://api.mapbox.com/directions/v5/mapbox/driving/"
+        "$origin;$destination"
+        "?geometries=geojson"
+        "&access_token=$mapboxAccessToken"
+        "&steps=true"
+        "&overview=full";
+
+    try {
+      // Option 1: Open in Mapbox mobile app if installed
+      final mapboxAppUrl = "mapbox://directions/$origin;$destination";
+
+      print("Direction -> $mapboxAppUrl");
+      print("Direction -> $mapboxDirectionsUrl");
+
+      // if (await canLaunchUrl(Uri.parse(mapboxAppUrl))) {
+      //   await launchUrl(Uri.parse(mapboxAppUrl));
+      // }
+      // // Option 2: Fallback to web view
+      // else if (await canLaunchUrl(Uri.parse(mapboxDirectionsUrl))) {
+      //   await launchUrl(Uri.parse(mapboxDirectionsUrl));
+      // }
+      // // Option 3: Show route on your existing map
+      // else {
+      //   await _showRouteOnMap(origin, destination);
+      // }
+    } catch (e) {
+      _showErrorSnackBar("Error launching directions: $e");
+    }
   }
 
   void _callRestaurant(Restaurant restaurant) {
@@ -367,8 +417,42 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
     setState(() {
       searchQuery = query;
       showSearchResults = query.isNotEmpty;
-      _filterRestaurants();
+
+      if (query.isEmpty) {
+        filteredRestaurants =
+            restaurants.where((restaurant) {
+              return selectedCategory == 'All' ||
+                  restaurant.category == selectedCategory;
+            }).toList();
+      } else {
+        // Search in restaurants
+        filteredRestaurants =
+            restaurants.where((restaurant) {
+              final matchesSearch =
+                  restaurant.name.toLowerCase().contains(query.toLowerCase()) ||
+                  restaurant.cuisine.toLowerCase().contains(
+                    query.toLowerCase(),
+                  ) ||
+                  restaurant.category.toLowerCase().contains(
+                    query.toLowerCase(),
+                  ) ||
+                  restaurant.description.toLowerCase().contains(
+                    query.toLowerCase(),
+                  );
+
+              final matchesCategory =
+                  selectedCategory == 'All' ||
+                  selectedCategory == 'Restaurants' ||
+                  restaurant.category == selectedCategory;
+
+              return matchesSearch && matchesCategory;
+            }).toList();
+      }
     });
+
+    if (isMapReady) {
+      _addRestaurantMarkers();
+    }
   }
 
   void _filterRestaurants() {
@@ -582,8 +666,23 @@ class _RestaurantMapScreenState extends State<RestaurantMapScreen>
               searchQuery: searchQuery,
               onSearchChanged: _onSearchChanged,
               showResults: showSearchResults,
-              filteredRestaurants: filteredRestaurants,
-              onRestaurantSelected: _onRestaurantSelected,
+              filteredResults:
+                  filteredRestaurants, // This would be a combined list of all location types
+              onResultSelected: (result) {
+                if (result is Restaurant) {
+                  _onRestaurantSelected(result);
+                } else {
+
+                  ///`?` [Todo : Check what need to do?]
+                }
+              },
+              onCategorySelected: (category) {
+                setState(() {
+                  selectedCategory = category;
+                  _filterRestaurants();
+                });
+              },
+              isSearching: isLoading,
             ),
           ),
 

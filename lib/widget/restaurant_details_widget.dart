@@ -6,6 +6,7 @@ class RestaurantDetailModal extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback onFavoriteToggle;
   final VoidCallback onMessage;
+  final VoidCallback onDirections;
 
   const RestaurantDetailModal({
     super.key,
@@ -13,6 +14,7 @@ class RestaurantDetailModal extends StatelessWidget {
     required this.isFavorite,
     required this.onFavoriteToggle,
     required this.onMessage,
+    required this.onDirections,
   });
 
   @override
@@ -103,10 +105,7 @@ class RestaurantDetailModal extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         restaurant.cuisine,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 12),
 
@@ -131,7 +130,11 @@ class RestaurantDetailModal extends StatelessWidget {
                             child: Text(restaurant.price),
                           ),
                           const SizedBox(width: 16),
-                          const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                          const Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
                           Text(
                             ' ${restaurant.duration} min',
                             style: TextStyle(color: Colors.grey[600]),
@@ -161,7 +164,11 @@ class RestaurantDetailModal extends StatelessWidget {
                       // Hours
                       Row(
                         children: [
-                          const Icon(Icons.schedule, size: 18, color: Colors.grey),
+                          const Icon(
+                            Icons.schedule,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             restaurant.hours,
@@ -182,15 +189,25 @@ class RestaurantDetailModal extends StatelessWidget {
                             child: ElevatedButton.icon(
                               onPressed: onFavoriteToggle,
                               icon: Icon(
-                                isFavorite ? Icons.favorite : Icons.favorite_border,
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
                                 color: isFavorite ? Colors.red : Colors.grey,
                               ),
-                              label: Text(isFavorite ? 'Favorited' : 'Favorite'),
+                              label: Text(
+                                isFavorite ? 'Favorited' : 'Favorite',
+                              ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: isFavorite ? Colors.red[50] : Colors.grey[100],
-                                foregroundColor: isFavorite ? Colors.red : Colors.grey[700],
+                                backgroundColor:
+                                    isFavorite
+                                        ? Colors.red[50]
+                                        : Colors.grey[100],
+                                foregroundColor:
+                                    isFavorite ? Colors.red : Colors.grey[700],
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -207,7 +224,28 @@ class RestaurantDetailModal extends StatelessWidget {
                                 backgroundColor: Colors.grey[100],
                                 foregroundColor: Colors.grey[700],
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: onDirections,
+                              icon: const Icon(Icons.directions),
+                              label: const Text('Directions'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue[50],
+                                foregroundColor: Colors.blue,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
